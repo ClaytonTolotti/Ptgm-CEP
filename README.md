@@ -1,12 +1,12 @@
-#README
+# README
 
-##Introdução
+## Introdução
 No repositório há dois projetos, **protegemed** e **protegemed-receive**
 
 * protegemed: Web Service REST + CEP(Drools)
 * protegemed-receive: Web Service REST + CEP(Drools)
 
-####O que é cada projeto
+#### **O que é cada projeto**
 O **protegemed** é utilizado na integração com o dispositivo MBED e será integrado também ao Texas, a aplicação recebe os eventos dos dispositivos e os processa.
 Exemplo de requisição do MBED:
 *TYPE=01&OUTLET=01&RFID=FFFF0002&OFFSET=2093&GAIN=444E6B09&RMS=3FA277C5&MV=00000000&MV2=00000000&UNDER=0000&OVER=0000&DURATION=0000&SIN=44A74464%3BC232764E%3BC02F3D9A%3BC12780FC%3B42618EF4%3BC1CC261E%3BC21668A5%3BC0E1178A%3BC164BAB6%3BC0A07318%3BC10AEC48%3BC095ACE4&COS=C41D1918%3B418A1530%3B41B06ECC%3B40F0FE2A%3B42321A4A%3BC0C2D6BE%3BBE3880E4%3BC01D72A3%3BC12024DE%3B3FF28A7C%3BC05C0DE6%3B4014D9FD"*
