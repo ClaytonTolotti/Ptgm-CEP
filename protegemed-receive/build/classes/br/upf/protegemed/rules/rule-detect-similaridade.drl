@@ -1,0 +1,50 @@
+/*
+ created by Clayton Tolotti; claytontolotti@gmail.com on: 14/04/2018
+*/
+package br.upf.protegemed.rules
+
+import br.upf.protegemed.beans.CapturaAtual
+import br.upf.protegemed.utils.Calculos
+import org.apache.log4j.Logger
+
+global Logger logger;
+
+rule "rule-detected-similaridade-1"
+	salience 3 //regra será disparada antes da relação de início e fuga.
+	when
+		$eventOneBefore : CapturaAtual( getEventos().getCodEvento() == 1) 
+		$eventOneAfter : CapturaAtual( getEventos().getCodEvento() == 1
+					&& $eventOneBefore.getTomada().getCodTomada() != getTomada().getCodTomada()
+					&& $eventOneBefore.getSalaCirurgia().getCodSala() == $eventOneAfter.getSalaCirurgia().getCodSala()
+				)
+		$outlet	: CapturaAtual(
+					this.getEventos().getCodEvento() == 6 
+					&& this.getTomada().getCodTomada() != $eventOneBefore.getTomada().getCodTomada()
+					&& this.getTomada().getCodTomada() == $eventOneAfter.getTomada().getCodTomada()
+					&& this.getSalaCirurgia().getCodSala() == $eventOneAfter.getSalaCirurgia().getCodSala()
+					,this after[0s] $eventOneAfter && $eventOneAfter after[0s] $eventOneBefore
+				)
+	then
+    	logger = Logger.getLogger(CapturaAtual.class);
+    	logger.info("execute rule " + drools.getRule().getName());
+end;
+
+rule "rule-detected-similaridade-2"
+	salience 2 //regra será disparada antes da relação de início e fuga.
+	when
+		$eventOneBefore : CapturaAtual( getEventos().getCodEvento() == 1) 
+		$eventOneAfter : CapturaAtual( getEventos().getCodEvento() == 1
+					&& $eventOneBefore.getTomada().getCodTomada() != getTomada().getCodTomada()
+					&& $eventOneBefore.getSalaCirurgia().getCodSala() == $eventOneAfter.getSalaCirurgia().getCodSala()
+				)
+		$outlet	: CapturaAtual(
+					this.getEventos().getCodEvento() == 6 
+					&& this.getTomada().getCodTomada() == $eventOneBefore.getTomada().getCodTomada()
+					&& this.getTomada().getCodTomada() != $eventOneAfter.getTomada().getCodTomada()
+					&& this.getSalaCirurgia().getCodSala() == $eventOneBefore.getSalaCirurgia().getCodSala()
+					,this after[0s] $eventOneAfter && $eventOneAfter after[0s] $eventOneBefore
+				)
+	then
+    	logger = Logger.getLogger(CapturaAtual.class);
+    	logger.info("execute rule " + drools.getRule().getName());
+end;

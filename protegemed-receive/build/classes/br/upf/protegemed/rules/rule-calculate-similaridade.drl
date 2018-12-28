@@ -1,0 +1,22 @@
+//created by Clayton Tolotti: claytontolotti@gmail.com, on: 24/06/2018
+package br.upf.protegemed.rules
+
+import br.upf.protegemed.beans.CapturaAtual
+import br.upf.protegemed.utils.Calculos
+import br.upf.protegemed.dao.CapturaAtualDAO
+
+rule "rule-calculate-similaridade"
+	salience 4
+	activation-group "calcule-simil"
+    when
+		$eventOneBefore : CapturaAtual( getEventos().getCodEvento() == 1) 
+		$eventOneAfter : CapturaAtual( this.getEventos().getCodEvento() == 1
+					,this.getSalaCirurgia().getCodSala() == $eventOneBefore.getSalaCirurgia().getCodSala()
+					,this.getTomada().getCodTomada() != $eventOneBefore.getTomada().getCodTomada()
+				)
+    then
+    	Integer $periculosidadeSimilaridade = Calculos.calcularSpearman($eventOneBefore, $eventOneAfter);
+    	$eventOneBefore.setPericulosidadeSimilaridade($periculosidadeSimilaridade);
+    	$eventOneAfter.setPericulosidadeSimilaridade($periculosidadeSimilaridade);
+    	new CapturaAtualDAO().updateSimilaridade($eventOneBefore, $eventOneAfter);
+end

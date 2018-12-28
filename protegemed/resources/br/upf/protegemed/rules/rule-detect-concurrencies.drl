@@ -1,0 +1,86 @@
+/*
+ created by Clayton Tolotti; claytontolotti@gmail.com on: 14/04/2018
+*/
+package br.upf.protegemed.rules
+
+import br.upf.protegemed.beans.CapturaAtual
+import br.upf.protegemed.dao.CapturaAtualDAO
+import br.upf.protegemed.utils.Calculos
+
+rule "rule-detected-similaridade-1"
+	salience 3 //regra será disparada antes da relação de início e fuga.
+	when
+		$eventOneBefore : CapturaAtual( getEventos().getCodEvento() == 1) 
+		$eventOneAfter : CapturaAtual( this.getEventos().getCodEvento() == 1
+					&& $eventOneBefore.getTomada().getCodTomada() != this.getTomada().getCodTomada()
+					&& $eventOneBefore.getSalaCirurgia().getCodSala() == this.getSalaCirurgia().getCodSala()
+				)
+		$outlet	: CapturaAtual(
+					this.getEventos().getCodEvento() == 6 
+					&& this.getTomada().getCodTomada() != $eventOneBefore.getTomada().getCodTomada()
+					&& this.getTomada().getCodTomada() == $eventOneAfter.getTomada().getCodTomada()
+					&& this.getSalaCirurgia().getCodSala() == $eventOneAfter.getSalaCirurgia().getCodSala()
+					,this after[0s] $eventOneAfter && $eventOneAfter after[0s] $eventOneBefore
+				)
+	then
+    	String $capturas;
+    	Double $res;
+    	Integer $periculosidadeSimilaridade;
+    	
+    	$capturas = $eventOneBefore.getCodCaptura() + "|" + $eventOneAfter.getCodCaptura();
+    	$res = Calculos.calcularSpearman($eventOneBefore, $eventOneAfter);
+    	$eventOneBefore.setSpearman($res);
+    	$eventOneAfter.setSpearman($res);
+    	
+    	if ($res >= 0.95) {
+			$periculosidadeSimilaridade = 3;
+		} else if ($res <= 0.84900) {
+			$periculosidadeSimilaridade = 1;
+		} else {
+			$periculosidadeSimilaridade = 2;
+		}
+		
+    	$eventOneBefore.setPericulosidadeSimilaridade($periculosidadeSimilaridade);
+    	$eventOneAfter.setPericulosidadeSimilaridade($periculosidadeSimilaridade);
+    	new CapturaAtualDAO().updateSimilaridade($capturas, $eventOneBefore, $eventOneAfter);
+end;
+/*
+
+rule "rule-detected-similaridade-2"
+	salience 2 //regra será disparada antes da relação de início e fuga.
+	when
+		$eventOneBefore : CapturaAtual( getEventos().getCodEvento() == 1) 
+		$eventOneAfter : CapturaAtual( this.getEventos().getCodEvento() == 1
+					&& $eventOneBefore.getTomada().getCodTomada() != this.getTomada().getCodTomada()
+					&& $eventOneBefore.getSalaCirurgia().getCodSala() == this.getSalaCirurgia().getCodSala()
+				)
+		$outlet	: CapturaAtual(
+					this.getEventos().getCodEvento() == 6 
+					&& this.getTomada().getCodTomada() == $eventOneBefore.getTomada().getCodTomada()
+					&& this.getTomada().getCodTomada() != $eventOneAfter.getTomada().getCodTomada()
+					&& this.getSalaCirurgia().getCodSala() == $eventOneBefore.getSalaCirurgia().getCodSala()
+					,this after[0s] $eventOneAfter && $eventOneAfter after[0s] $eventOneBefore
+				)
+	then
+    	String $capturas;
+    	Double $res;
+    	Integer $periculosidadeSimilaridade;
+    	
+    	$capturas = $eventOneBefore.getCodCaptura() + "|" + $eventOneAfter.getCodCaptura();
+    	$res = Calculos.calcularSpearman($eventOneBefore, $eventOneAfter);
+    	$eventOneBefore.setSpearman($res);
+    	$eventOneAfter.setSpearman($res);
+    	
+    	if ($res >= 0.95) {
+			$periculosidadeSimilaridade = 3;
+		} else if ($res <= 0.84900) {
+			$periculosidadeSimilaridade = 1;
+		} else {
+			$periculosidadeSimilaridade = 2;
+		}
+		
+		$eventOneBefore.setPericulosidadeSimilaridade($periculosidadeSimilaridade);
+    	$eventOneAfter.setPericulosidadeSimilaridade($periculosidadeSimilaridade);
+    	new CapturaAtualDAO().updateSimilaridade($capturas, $eventOneBefore, $eventOneAfter);
+end;
+*/

@@ -1,0 +1,16 @@
+//created by Clayton Tolotti: claytontolotti@gmail.com on: 16/06/2018
+package br.upf.protegemed.rules
+
+import br.upf.protegemed.beans.CapturaAtual
+import br.upf.protegemed.beans.escala.EscalaFrequencia
+import br.upf.protegemed.dao.CapturaAtualDAO
+
+rule "rule-frequencia-corrente"
+	salience 5
+    when
+		$captura : CapturaAtual( getEventos().getCodEvento() == 1 )
+    then
+    	Integer $periculosidadeFrequencia = EscalaFrequencia.getStatusFrequencia($captura);
+    	$captura.setPericulosidadeFrequencia($periculosidadeFrequencia);
+    	new CapturaAtualDAO().updateFrequencia($captura);
+end

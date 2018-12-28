@@ -1,0 +1,26 @@
+//created by Clayton Tolotti: claytontolotti@gmail.com, on: 01/04/2018
+package br.upf.protegemed.rules
+
+import br.upf.protegemed.beans.CapturaAtual
+import br.upf.protegemed.dao.CapturaAtualDAO
+import org.apache.log4j.Logger
+
+global Logger logger;
+
+rule "detect-flight-plug-one-six"
+	when
+		$eventOne : CapturaAtual( getEventos().getCodEvento() == 1 )
+		$eventSix : CapturaAtual( getEventos().getCodEvento() == 6 )
+		$outlet   : CapturaAtual(
+						$eventSix.getTomada().getCodTomada() == $eventOne.getTomada().getCodTomada() 
+						&& $eventSix after[0s] $eventOne
+					)
+	then
+		long $duracao = CapturaAtual.durationBetweenEvent($eventSix.getData(), $eventOne.getData());
+		new CapturaAtualDAO().updateDurationCapturaAtual($eventOne, $eventSix, $duracao);
+		logger = Logger.getLogger(CapturaAtual.class);
+		//logger.info("eventOne: " + $eventOne.getCodCaptura()+
+		//	" eventSix: " + $eventSix.getCodCaptura() + " duracao: " + $duracao);
+		delete($eventOne);
+		delete($eventSix);
+end

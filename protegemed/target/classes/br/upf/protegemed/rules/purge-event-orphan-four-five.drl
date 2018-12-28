@@ -1,0 +1,35 @@
+//created by Clayton Tolotti: claytontolotti@gmail.com, on: 11/05/2018
+package br.upf.protegemed.rules
+
+import br.upf.protegemed.beans.CapturaAtual
+import br.upf.protegemed.dao.CapturaAtualDAO
+
+rule "rule-detect-orphan-event-four"
+	salience 9
+	when
+		$typeFour : CapturaAtual( getEventos().getCodEvento() == 4 )
+		$currentFour : CapturaAtual(
+					getEventos().getCodEvento() == $typeFour.getEventos().getCodEvento() && 
+					getTomada().getCodTomada() == $typeFour.getTomada().getCodTomada() &&
+					getCodCaptura() != $typeFour.getCodCaptura()
+				)
+		$delete : CapturaAtual( $typeFour after[0s] $currentFour)
+	then
+		new CapturaAtualDAO().updateCapturaAtualOrfao($typeFour);
+		retract($typeFour);
+end
+
+rule "rule-detect-orphan-event-five"
+	salience 9
+	when
+		$typeFive : CapturaAtual( getEventos().getCodEvento() == 5 )
+		$currentFive : CapturaAtual(
+					getEventos().getCodEvento() == $typeFive.getEventos().getCodEvento() && 
+					getTomada().getCodTomada() == $typeFive.getTomada().getCodTomada() &&
+					getCodCaptura() != $typeFive.getCodCaptura()
+				)
+		$delete : CapturaAtual( $typeFive after[0s] $currentFive)
+	then
+		new CapturaAtualDAO().updateCapturaAtualOrfao($typeFive);
+		retract($typeFive);
+end

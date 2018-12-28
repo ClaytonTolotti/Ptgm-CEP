@@ -1,0 +1,36 @@
+//created by Clayton Tolotti: claytontolotti@gmail.com, on: 11/05/2018
+package br.upf.protegemed.rules
+
+import br.upf.protegemed.beans.CapturaAtual
+import br.upf.protegemed.dao.CapturaAtualDAO
+
+rule "rule-detect-orphan-event-one"
+	salience 10
+	when
+		$typeOne : CapturaAtual( this.getEventos().getCodEvento() == 1 )
+		$currentOne : CapturaAtual(
+					getEventos().getCodEvento() == $typeOne.getEventos().getCodEvento() && 
+					getTomada().getCodTomada() == $typeOne.getTomada().getCodTomada() &&
+					getCodCaptura() != $typeOne.getCodCaptura()
+				)
+		$delete : CapturaAtual( $typeOne after[0s] $currentOne)
+	then
+		new CapturaAtualDAO().updateCapturaAtualOrfao($typeOne);
+		retract($typeOne);
+end
+
+rule "rule-detect-orphan-event-six"
+	salience 10
+	when
+		$typeSix : CapturaAtual( this.getEventos().getCodEvento() == 6 )
+		$currentSix: CapturaAtual( 
+					getEventos().getCodEvento() == $typeSix.getEventos().getCodEvento() &&
+					getTomada().getCodTomada() == $typeSix.getTomada().getCodTomada() &&
+					getCodCaptura() != $typeSix.getCodCaptura()
+				)
+		$delete : CapturaAtual( $typeSix after[0s] $currentSix)
+				
+	then
+		new CapturaAtualDAO().updateCapturaAtualOrfao($typeSix);
+		retract($typeSix);
+end
